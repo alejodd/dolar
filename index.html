@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cotización de Dólar</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link href="dist/css/poncho.min.css" rel="stylesheet">
+    <link href="dist/css/icono-arg.css" rel="stylesheet">
+    <style>
+        .container {
+            width: 100%;
+            padding-right: 0;
+            padding-left: 0;
+            margin-right: 0;
+            margin-left: 0;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background: linear-gradient(to bottom, #ffd700, #ff8c00, #ffffff);
+        }
+        h1 {
+            background-color: #2897d4;
+            color: #fff;
+            padding: 2px;
+            margin: 0;
+        }
+
+        #columna-izquierda {
+            width: 33.33%;
+            float: left;
+            background-color: #f2f2f2;
+            padding: 20px;
+        }
+
+        #columna-centro {
+            width: 33.33%;
+            float: left;
+            background-color: #e6e6e6;
+            padding: 20px;
+        }
+
+        #columna-derecha {
+            width: 33.33%;
+            float: left;
+            background-color: #cccccc;
+            padding: 20px;
+        }
+
+        hr {
+            clear: both;
+            border: 1px solid #ccc;
+        }
+
+        .row {
+    padding-bottom: 152px;
+        }
+
+
+        #copyright {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background-color: #2897d4;
+            color: #fff;
+            padding: 5px;
+            margin: 0;
+        }
+
+        hr {
+            clear: both;
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="copyright">
+        © Duarte
+    </div>
+
+<div class="container">
+    <h1 class="text-center">Cotización de Dólar</h1>
+   
+    <br>
+
+    <div class="row">
+        <div class="col-sm-6 col-sm-offset-3">
+            <form class="form-horizontal" id="cotizacion-form">
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">Elige un tipo de dólar:</label>
+                    <div class="col-sm-8">
+                        <select class="form-control" id="tipo-dolar">
+                            <option value="oficial">Oficial</option>
+                            <option value="blue">Blue</option>
+                            <option value="bolsa">Bolsa</option>
+                            <option value="contadoconliqui">Contado con Liqui</option>
+                            <option value="solidario">Solidario</option>
+                            <option value="tarjeta">Tarjeta</option>
+                            <option value="mayorista">Mayorista</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-sm-8 col-sm-offset-4">
+                        <center>
+                        <button type="button" class="btn btn-primary" id="mostrar-cotizacion"><i class="icono arg-dolar"></i> Mostrar Cotización</button>
+                        </center>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-6 col-sm-offset-3">
+            <div class="alert alert-success" id="cotizacion-result" style="display: none;">
+                <strong>Cotización:</strong>
+                <p id="valor-compra"></p>
+                <p id="valor-venta"></p>
+                <p id="fecha-actualizacion"></p>
+            </div>
+            <div class="alert alert-danger" id="cotizacion-error" style="display: none;">
+                <strong>Error:</strong> No se pudo obtener la cotización.
+            </div>
+        </div>
+    </div>
+
+    <hr>
+
+    <center>
+    <div id="columna-izquierda">
+        <h2>Datos Actualizados?</h2>
+        <p>Los datos se actualizan cada 1 a 5 dias. (exepto que haya un salto brusco.)</p>
+    </div>
+
+    <div id="columna-centro">
+        <h2>Página Caída?</h2>
+        <p>Tambien puede visitar paginas confiables como dolarhoy.com...</p>
+    </div>
+
+    <div id="columna-derecha">
+        <h2>Framework Usado?</h2>
+        <p>Poncho Framework: argob.github.io/poncho/</p>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+<script>
+    function formatFecha(fecha) {
+        const options = { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', timeZoneName: 'short' };
+        return new Date(fecha).toLocaleDateString('es-AR', options);
+    }
+
+    $(document).ready(function() {
+        $("#mostrar-cotizacion").click(function() {
+            var tipoDolar = $("#tipo-dolar").val();
+            $.get(`https://dolarapi.com/v1/dolares/${tipoDolar}`, function(data) {
+                if (data.compra && data.venta) {
+                    $("#cotizacion-result").show();
+                    $("#cotizacion-error").hide();
+                    $("#valor-compra").text("Valor de compra: " + data.compra);
+                    $("#valor-venta").text("Valor de venta: " + data.venta);
+                    if (data.fechaActualizacion) {
+                        $("#fecha-actualizacion").text("Fecha de actualización: " + formatFecha(data.fechaActualizacion));
+                    } else {
+                        $("#fecha-actualizacion").text("Fecha de actualización no disponible");
+                    }
+                } else {
+                    $("#cotizacion-result").hide();
+                    $("#cotizacion-error").show();
+                }
+            });
+        });
+    });
+</script>
+</body>
+</html>
